@@ -16,7 +16,7 @@ def transform(args, workspace_lh, workspace_rh, nsubjs):
     for m in range(nsubjs):
       transform_lh[:,:,m] = bW_lh[m*args.nvoxel:(m+1)*args.nvoxel,:]
       transform_rh[:,:,m] = bW_rh[m*args.nvoxel:(m+1)*args.nvoxel,:]
-  elif args.align_algo in ['ha_sm_retraction']:
+  elif args.align_algo in ['ha_sm_retraction','srm_spatial']:
     bW_lh = workspace_lh['W']
     bW_rh = workspace_rh['W']
     for m in range(nsubjs):
