@@ -11,18 +11,17 @@ from scipy.signal import butter, lfilter
 import nibabel as nib
 
 roi = 'pmc'
-smooth = True
 
+
+sig = 100.0
+featNum = 50
+iters = 10
 
 template_path = '/jukebox/fastscratch/janice/sherlock_movie/'
-if smooth:
-    input_path = '/jukebox/fastscratch/pohsuan/pHA/data/working/sherlock_smooth_pmc_noLR/813vx/1976TR/'
-    output_path = '/jukebox/ramadge/pohsuan/pHA/data/output/synthesized/sherlock_smooth_'+roi+'/'
-else:
-    input_path = '/jukebox/fastscratch/pohsuan/pHA/data/working/sherlock_nosmooth_pmc_noLR/813vx/1976TR/'
-    output_path = '/jukebox/ramadge/pohsuan/pHA/data/output/synthesized/sherlock_nosmooth_'+roi+'/'
+input_path = '/jukebox/fastscratch/pohsuan/SRM/data/working/sherlock_smooth_pmc_noLR/813vx/1976TR/'
+output_path = '/jukebox/ramadge/pohsuan/SRM/data/output/synthesized/sherlock_smooth_'+roi+'/'
 
-in_fname = 'mysseg_1st_winsize9/ha_syn/50feat/rand0/all/ha_syn__10.npz'
+in_fname = 'mysseg_1st_winsize9/srm_spatial_sig{sig}/{featNum}feat/rand0/all/srm_spatial__{iters}.npz'.format(sig=sig, featNum = featNum, iters = iters)
 
 if not os.path.exists(output_path):
     os.makedirs(output_path)
@@ -41,20 +40,21 @@ maskdata = mask.get_data()
 
 # load alignment results
 ws = np.load(input_path+in_fname)
-W = ws['R']
-S = ws['G'].T
+W = ws['W']
+S = ws['S']
 
-datadim = maskdata.shape +(S.shape[1],)
+datadim = maskdata.shape  #+(S.shape[1],)
 
-sele_feat = 0
+selefeat = 0
 
+print in_fname
 for idx,subj_idx in enumerate(subj_idx_all):
     syn_data = np.zeros(datadim, dtype=np.float32)
-    syn_data[i,j,k,:] = np.outer(W[:,sele_feat,idx],S[sele_feat,:])
+    syn_data[i,j,k] = W[:,selefeat,idx]
 
     #data = np.ones((32, 32, 15, 100), dtype=np.int16)
-
-    out_fname = 'sherlock_synthesized_s{}'.format(subj_idx) #os.path.join(output_path, data_name.format(subj_idx))
+    out_fname = 'sherlock_sig{sig}_featNum{featNum}_s{subj_idx}_selefeat{selefeat}th_iters{iters}'\
+                .format(sig=sig, featNum=featNum, subj_idx = subj_idx, selefeat = selefeat, iters = iters) 
     img_out = nib.Nifti1Image(syn_data,None)#, np.eye(4))
 
     nib.save(img_out,  output_path+out_fname+'.nii.gz')
