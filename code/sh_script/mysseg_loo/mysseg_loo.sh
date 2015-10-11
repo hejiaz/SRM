@@ -12,9 +12,9 @@
 
 ## Submit Type
 #submittype='pni_submit'
-#submittype='pni_submit -l vf=12G'
+submittype='pni_submit -l vf=12G'
 #submittype='pni_submit -q long.q -P long -l vf=24G'
-submittype='python'
+#submittype='python'
 #submittype='submit_bigmem'
 
 
@@ -33,7 +33,7 @@ nsubj_minus_1=17 #number of subjs-1
 ln -s /jukebox/ramadge/pohsuan/SRM/code/$exp $exp
 chmod +x $exp
 
-for loo in $(seq 1 5)
+for loo in $(seq 1 $nsubj_minus_1) #11 12 13 14  #$(seq 1 5)
 do
 
     #$submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 1st -w $winsize noalign 1      $nvoxel --strfresh
@@ -46,8 +46,10 @@ do
         #$submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 2nd -w $winsize pca   1 $nfeat --strfresh 
         for rand in  $(seq 0 4)
         do
-            $submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 1st -w $winsize srm  $niter $nfeat -r $rand --strfresh
-            $submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 2nd -w $winsize srm  $niter $nfeat -r $rand --strfresh
+            #$submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 1st -w $winsize srm  $niter $nfeat -r $rand --strfresh
+            #$submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 2nd -w $winsize srm  $niter $nfeat -r $rand --strfresh
+            $submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 1st -w $winsize srm_noneprob  $niter $nfeat -r $rand --strfresh
+            $submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 2nd -w $winsize srm_noneprob  $niter $nfeat -r $rand --strfresh
             #$submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 1st -w $winsize ica       1 $nfeat -r $rand --strfresh
             #$submittype $exp $dataset $nvoxel $nTR mysseg --loo $loo -e 2nd -w $winsize ica       1 $nfeat -r $rand --strfresh
         done
