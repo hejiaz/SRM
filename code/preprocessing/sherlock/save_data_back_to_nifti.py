@@ -17,11 +17,19 @@ sig = 100.0
 featNum = 50
 iters = 10
 
+spatial = False
+
 template_path = '/jukebox/fastscratch/janice/sherlock_movie/'
-input_path = '/jukebox/fastscratch/pohsuan/SRM/data/working/sherlock_smooth_pmc_noLR/813vx/1976TR/'
 output_path = '/jukebox/ramadge/pohsuan/SRM/data/output/synthesized/sherlock_smooth_'+roi+'/'
 
-in_fname = 'mysseg_1st_winsize9/srm_spatial_sig{sig}/{featNum}feat/rand0/all/srm_spatial__{iters}.npz'.format(sig=sig, featNum = featNum, iters = iters)
+if spatial:
+    input_path = '/jukebox/fastscratch/pohsuan/SRM/data/working/sherlock_smooth_pmc_noLR/813vx/1976TR/'
+    in_fname = 'mysseg_1st_winsize9/srm_spatial_sig{sig}/{featNum}feat/rand0/all/srm_spatial__{iters}.npz'.format(sig=sig, featNum = featNum, iters = iters)
+    algoname = 'srm_spatial'
+else:
+    input_path = '/fastscratch/pohsuan/pHA/data/working/sherlock_smooth_pmc_noLR/813vx/1976TR/'
+    in_fname = 'mysseg_1st_winsize9/pha_em/{featNum}feat/rand0/loo0/pha_em__{iters}.npz'.format(sig=sig, featNum = featNum, iters = iters)
+    algoname = 'srm'
 
 if not os.path.exists(output_path):
     os.makedirs(output_path)
@@ -40,21 +48,31 @@ maskdata = mask.get_data()
 
 # load alignment results
 ws = np.load(input_path+in_fname)
-W = ws['W']
-S = ws['S']
+if spatial:
+    W = ws['W']
+    S = ws['S']
+else:
+    W = ws['bW']
+    S = ws['ES']
 
 datadim = maskdata.shape  #+(S.shape[1],)
 
-selefeat = 0
+selefeat = 1
 
 print in_fname
 for idx,subj_idx in enumerate(subj_idx_all):
     syn_data = np.zeros(datadim, dtype=np.float32)
-    syn_data[i,j,k] = W[:,selefeat,idx]
-
+    if spatial:
+        syn_data[i,j,k] = W[:,selefeat,idx]
+    else:
+        ##TODO this is incorrect! FIX THIS!
+        syn_data[i,j,k] = W[idx*813:(idx+1)*813:,selefeat]
+    
+    #print W[:,selefeat,idx]
     #data = np.ones((32, 32, 15, 100), dtype=np.int16)
-    out_fname = 'sherlock_sig{sig}_featNum{featNum}_s{subj_idx}_selefeat{selefeat}th_iters{iters}'\
-                .format(sig=sig, featNum=featNum, subj_idx = subj_idx, selefeat = selefeat, iters = iters) 
+
+    out_fname = 'sherlock_{algoname}_sig{sig}_featNum{featNum}_s{subj_idx}_selefeat{selefeat}th_iters{iters}'\
+                .format(algoname=algoname, sig=sig, featNum=featNum, subj_idx = subj_idx, selefeat = selefeat, iters = iters) 
     img_out = nib.Nifti1Image(syn_data,None)#, np.eye(4))
 
     nib.save(img_out,  output_path+out_fname+'.nii.gz')
