@@ -2,6 +2,7 @@
 
 import numpy as np
 from scipy import stats
+import sys
 
 def transform(args, workspace_lh ,workspace_rh, align_data_lh, align_data_rh, nsubjs):
   transform_lh = np.zeros((args.nvoxel,args.nfeature,nsubjs))
@@ -84,6 +85,9 @@ def transform(args, workspace_lh ,workspace_rh, align_data_lh, align_data_rh, ns
     #U_rh, s_rh, V_rh = np.linalg.svd(align_data_rh_loo_zscore.dot(workspace_rh['ES'].T)+0.001*pert, full_matrices=False)
     #transform_lh[:,:,loo] = U_lh.dot(V_lh)
     #transform_rh[:,:,loo] = U_rh.dot(V_rh)    
+
+  elif args.align_algo in ['gica']:
+    sys.exit('The algorithm does not support leave-one-out')
 
   elif args.align_algo == 'noalign' :
     for m in range(nsubjs):

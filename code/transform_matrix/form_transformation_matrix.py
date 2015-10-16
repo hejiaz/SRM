@@ -22,6 +22,9 @@ def transform(args, workspace_lh, workspace_rh, nsubjs):
     for m in range(nsubjs):
       transform_lh[:,:,m] = bW_lh[:,:,m]
       transform_rh[:,:,m] = bW_rh[:,:,m]
+  elif args.align_algo in ['gica']:
+    transform_lh[:,:,m] = np.linalg.pinv(workspace_lh['bW']).T
+    transform_rh[:,:,m] = np.linalg.pinv(workspace_rh['bW']).T
   elif args.align_algo == 'noalign' :
     for m in range(nsubjs):
       transform_lh[:,:,m] = np.identity(args.nvoxel)
